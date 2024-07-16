@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Presentation\WebModule\Presenters;
 
-abstract class BasePresenter extends \App\Presentation\Presenters\BasePresenter
+final class HomepagePresenter extends BasePresenter
 {
 
 }

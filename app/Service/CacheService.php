@@ -1,5 +1,4 @@
 <?php declare(strict_types=1);
-
 namespace App\Service;
 
 use Nette\Caching\Cache;
@@ -7,10 +6,6 @@ use Nette\Caching\Storages\DevNullStorage;
 use Nette\Caching\Storages\FileStorage;
 use Nette\Utils\FileSystem;
 
-/**
- * Class CacheService
- * @package DWE\Service
- */
 final readonly class CacheService
 {
     /**

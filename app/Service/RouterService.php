@@ -1,13 +1,8 @@
 <?php declare(strict_types=1);
-
 namespace App\Service;
 
 use Nette\Application\Routers\RouteList;
 
-/**
- * Class RouterService
- * @package App\Service
- */
 final class RouterService
 {
     /**

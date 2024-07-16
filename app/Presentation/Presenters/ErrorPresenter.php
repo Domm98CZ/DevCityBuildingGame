@@ -1,5 +1,4 @@
 <?php declare(strict_types=1);
-
 namespace App\Presentation\Presenters;
 
 use Nette\Application\BadRequestException;
@@ -11,10 +10,6 @@ use Nette\Application\UI\Presenter;
 use Nette\SmartObject;
 use Tracy\ILogger;
 
-/**
- * Class ErrorPresenter
- * @package App\Presentation\Presenters
- */
 class ErrorPresenter extends Presenter
 {
     use SmartObject;

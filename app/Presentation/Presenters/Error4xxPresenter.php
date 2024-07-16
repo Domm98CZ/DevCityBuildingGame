@@ -1,14 +1,10 @@
 <?php declare(strict_types=1);
-
 namespace App\Presentation\Presenters;
 
 use Nette\Application\BadRequestException;
 use Nette\Application\Request;
 use Nette\Application\UI\Template;
-/**
- * Class Error4xxPresenter
- * @package App\Presentation\Presenters
- */
+
 class Error4xxPresenter extends BasePresenter
 {
     /**

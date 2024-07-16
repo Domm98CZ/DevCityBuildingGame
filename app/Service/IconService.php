@@ -1,13 +1,8 @@
 <?php declare(strict_types=1);
-
 namespace App\Service;
 
 use Nette\Utils\Html;
 
-/**
- * Class IconService
- * @package DWE\Service
- */
 final class IconService
 {
     public const ICON_BASE = self::FA_ICON_STYLE_SOLID;
