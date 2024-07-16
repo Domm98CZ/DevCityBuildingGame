@@ -1,0 +1,22 @@
+version: '3.9'
+
+networks:
+    default:
+        external: true
+        name: php_network
+
+services:
+    app:
+        image: registry.gitlab.com/prochazka-dominik/docker/php-dev-application:8.2.4
+        container_name: game_app_1
+        volumes:
+            - .:/var/www/app
+        #            - ./resources/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini # for xdebug users only
+        environment:
+            - VIRTUAL_HOST=game.loc,app.game.loc,admin.game.loc,api.game.loc
+        healthcheck:
+            test: ["CMD","curl","-f","http://game.loc"]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s

@@ -1,0 +1,8 @@
+parameters:
+	applicationEnv: "dev"
+	smtp:
+		smtp: true
+		host: 'cool.smtp.com'
+		username: 'my@email.com'
+		password: 'topsecretpass'
+		secure: 'ssl'

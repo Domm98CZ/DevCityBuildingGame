@@ -1,0 +1,42 @@
+<files "/app/">
+  order allow,deny
+  deny from all
+</files>
+
+<files "/config/">
+  order allow,deny
+  deny from all
+</files>
+
+<files "/log/">
+  order allow,deny
+  deny from all
+</files>
+
+<files "/resources/">
+  order allow,deny
+  deny from all
+</files>
+
+<files "/temp/">
+  order allow,deny
+  deny from all
+</files>
+
+<files "/vendor/">
+  order allow,deny
+  deny from all
+</files>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{SERVER_NAME} [L,R=301]
+
+    RewriteRule ^$ /www/ [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !^/www/
+    RewriteRule ^(.*)$ /www/$1
+</IfModule>

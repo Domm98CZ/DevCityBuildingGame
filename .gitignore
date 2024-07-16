@@ -1,0 +1,16 @@
+.idea
+docker-compose.yaml
+docker-compose.yml
+vendor
+log/*
+temp/*
+www/uploads/*
+www/node_modules
+app/.debug
+tests/Output
+tests/Output/
+tests/Output/*
+tests/database.ini
+resources/xdebug/xdebug.ini
+resources/xdebug/logs/*
+config/local.neon

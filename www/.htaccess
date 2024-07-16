@@ -1,0 +1,79 @@
+<IfModule mod_autoindex.c>
+	Options -Indexes
+</IfModule>
+
+<Files ".npmrc">
+  Order Allow,Deny
+  Deny from all
+</Files>
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+
+	RewriteRule /\.|^\. - [F]
+
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule !\.(pdf|js|ico|gif|jpg|png|css|rar|zip|tar\.gz|map)$ index.php [L]
+
+    RewriteRule ^(.*)(--)([0-9]+){8}\.(css|js)$ $1.$4
+</IfModule>
+
+<IfModule mod_deflate.c>
+	<IfModule mod_filter.c>
+		AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/x-javascript text/javascript application/javascript application/json
+	</IfModule>
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access 1 year"
+    ExpiresByType image/jpeg "access 1 year"
+    ExpiresByType image/gif "access 1 year"
+    ExpiresByType image/png "access 1 year"
+    ExpiresByType text/css "access 1 month"
+    ExpiresByType text/html "access 1 month"
+    ExpiresByType application/pdf "access 1 month"
+    ExpiresByType text/x-javascript "access 1 month"
+    ExpiresByType application/x-shockwave-flash "access 1 month"
+    ExpiresByType image/x-icon "access 1 year"
+    ExpiresDefault "access 1 month"
+
+    <filesMatch "\.(pdf)$">
+        ExpiresActive Off
+    </filesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set Connection keep-alive
+    <filesmatch "\.(ico|flv|gif|swf|eot|woff|otf|ttf|svg)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </filesmatch>
+    <filesmatch "\.(jpg|jpeg|png)$">
+        Header set Cache-Control "max-age=1209600, public"
+    </filesmatch>
+    <filesmatch "\.(css)$">
+        Header set Cache-Control "max-age=31536000, private"
+    </filesmatch>
+    <filesmatch "\.(js)$">
+        Header set Cache-Control "max-age=1209600, private"
+    </filesmatch>
+    <filesMatch "\.(x?html?|php)$">
+        Header set Cache-Control "max-age=600, private, must-revalidate"
+    </filesMatch>
+    <filesMatch "\.(pdf)$">
+        FileETag None
+        Header unset ETag
+        Header unset Pragma
+        Header unset Cache-Control
+        Header unset Last-Modified
+        Header set Pragma "no-cache"
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Expires "Thu, 1 Jan 1970 00:00:00 GMT"
+    </filesMatch>
+</IfModule>
+
+php_value upload_max_filesize 20M
+php_value post_max_size 20M
+

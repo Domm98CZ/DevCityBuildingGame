@@ -1,0 +1,8 @@
+{
+    "private": true,
+    "dependencies": {
+        "@popperjs/core": "*",
+        "bootstrap": "*",
+        "moment": "*"
+    }
+}

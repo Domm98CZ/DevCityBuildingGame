@@ -1,0 +1,57 @@
+application:
+	errorPresenter: Error
+	catchExceptions: true
+	mapping:
+		*: App\Presentation\*Module\Presenters\*Presenter
+
+extensions:
+	translation: Contributte\Translation\DI\TranslationExtension
+
+
+translation:
+	locales:
+		whitelist: [cs, en]
+		default: cs
+		fallback: [cs]
+	dirs:
+		- %appDir%/Lang
+	returnOriginalMessage: true
+
+services:
+	router: App\Service\RouterService::createRouter(%application.prefix%)
+	- App\Service\CacheService(%tempDir%, %cacheEnabled%)
+
+parameters:
+	applicationEnv: "dev"
+	cacheEnabled: true
+	application:
+		name: "DevCityBuildingGame"
+		developer: "Dominik Procházka"
+		developer_url: "https://Domm.cz"
+		version: "1.0.0"
+		prefix: "" # "prod.srv."
+
+search:
+	web_services:
+		in: %appDir%/Service
+		classes:
+			- *Service
+
+session:
+	autoStart: always
+	name: game-%applicationEnv%
+	expiration: 14 days
+	cookieSamesite: Lax
+
+http:
+	frames: true
+	cookieSecure: false
+
+php:
+	date.timezone: Europe/Prague
+	upload_max_filesize: '20MB'
+	post_max_size: '20MB'
+	memory_limit: 8196M
+	max_execution_time: 3600
+	set_time_limit: 3600
+	default_socket_timeout: 50000
