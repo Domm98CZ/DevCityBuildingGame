@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace App\Service;
+namespace App\Services;
 
 use Nette\Application\Routers\RouteList;
 
@@ -24,6 +24,14 @@ final class RouterService
         $router->withDomain('api.%domain%')
             ->addRoute('<presenter>/<action>[/<id>]', [
                 'module' => 'Api',
+                'presenter' => 'Homepage',
+                'action' => 'default',
+                'id' => null,
+            ])
+        ;
+        $router->withDomain('play.%domain%')
+            ->addRoute('<presenter>/<action>[/<id>]', [
+                'module' => 'Game',
                 'presenter' => 'Homepage',
                 'action' => 'default',
                 'id' => null,

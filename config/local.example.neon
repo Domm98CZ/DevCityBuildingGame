@@ -6,3 +6,8 @@ parameters:
 		username: 'my@email.com'
 		password: 'topsecretpass'
 		secure: 'ssl'
+	databaseConnection:
+		host: 'db'
+		dbname: 'xyz'
+		user: 'not_root'
+		password: 'qwerty'

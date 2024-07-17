@@ -1,12 +1,13 @@
 application:
 	errorPresenter: Error
-	catchExceptions: true
+	catchExceptions: false
 	mapping:
 		*: App\Presentation\*Module\Presenters\*Presenter
 
 extensions:
 	translation: Contributte\Translation\DI\TranslationExtension
-
+	console: Contributte\Console\DI\ConsoleExtension(%consoleMode%)
+	migrations: Nextras\Migrations\Bridges\NetteDI\MigrationsExtension
 
 translation:
 	locales:
@@ -18,11 +19,17 @@ translation:
 	returnOriginalMessage: true
 
 services:
-	router: App\Service\RouterService::createRouter(%application.prefix%)
-	- App\Service\CacheService(%tempDir%, %cacheEnabled%)
+	router: App\Services\RouterService::createRouter(%application.prefix%)
+	- App\Services\CacheService(%tempDir%, %cacheEnabled%)
 
 parameters:
 	applicationEnv: "dev"
+	databaseConnection:
+		driver: 'pgsql'
+		host: ''
+		dbname: ''
+		user: ''
+		password: ''
 	cacheEnabled: false
 	application:
 		name: "DevCityBuildingGame"
@@ -32,10 +39,24 @@ parameters:
 		prefix: "" # "prod.srv."
 
 search:
-	web_services:
-		in: %appDir%/Service
+	services:
+		in: %appDir%/Services
 		classes:
 			- *Service
+	data_managers:
+		in: %appDir%/Data
+		exclude:
+			classes:
+				- App\Data\BasicManager
+		classes:
+			- *Manager
+	data_repository:
+		in: %appDir%/Data
+		exclude:
+			classes:
+				- App\Data\BasicRepository
+		classes:
+			- *Repository
 
 session:
 	autoStart: always
@@ -47,6 +68,9 @@ http:
 	frames: true
 	cookieSecure: false
 
+routing:
+	cache: true
+
 php:
 	date.timezone: Europe/Prague
 	upload_max_filesize: '20MB'
@@ -55,3 +79,36 @@ php:
 	max_execution_time: 3600
 	set_time_limit: 3600
 	default_socket_timeout: 50000
+
+migrations:
+	dir: %appDir%/../resources/migrations
+	driver: pgsql
+	dbal: nette
+	withDummyData: %debugMode%
+	groups:
+		structures:
+			enabled: true
+			directory: %appDir%/../resources/migrations/structures
+		basic-data:
+			enabled: true
+			directory: %appDir%/../resources/migrations/basic-data
+			dependencies: ['structures']
+		dummy-data:
+			enabled: %debugMode%
+			directory: %appDir%/../resources/migrations/dummy-data
+			dependencies: ['structures', 'basic-data']
+		dev:
+			enabled: %debugMode%
+			directory: %appDir%/../resources/migrations/dev
+			dependencies: ['structures', 'basic-data']
+		versions:
+			enabled: true
+			directory: %appDir%/../resources/migrations/versions
+			dependencies: ['structures', 'basic-data']
+
+database:
+	main:
+		dsn: 'pgsql:host=%databaseConnection.host%;dbname=%databaseConnection.dbname%'
+		user: %databaseConnection.user%
+		password: %databaseConnection.password%
+
