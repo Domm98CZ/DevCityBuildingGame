@@ -5,10 +5,15 @@ use App\Presentation\ApiModule\Presenters\MapPresenter;
 
 final class HomepagePresenter extends BasePresenter
 {
-    public function actionDefault(): void
+    public function actionDefault(?string $id = null): void
     {
         //@TODO: temp iteration of map area
         $x = new MapPresenter();
+
+        if ($id !== null) {
+            $x->setSeed($id);
+        }
+
         $x->generateMap();
 
         $cellWidth = $x->getCfg()[0] / $x->getCfg()[2];
@@ -17,5 +22,6 @@ final class HomepagePresenter extends BasePresenter
         $this->template->cellWidth = $cellWidth;
         $this->template->cellHeight = $cellHeight;
         $this->template->cells = $x->getMap();
+        $this->template->seed = $id;
     }
 }
