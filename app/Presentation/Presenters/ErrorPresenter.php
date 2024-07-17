@@ -5,8 +5,11 @@ use Nette\Application\BadRequestException;
 use Nette\Application\Helpers;
 use Nette\Application\Request;
 use Nette\Application\Response;
+use Nette\Application\Responses\CallbackResponse;
 use Nette\Application\Responses\ForwardResponse;
 use Nette\Application\UI\Presenter;
+use Nette\Http\IRequest;
+use Nette\Http\IResponse;
 use Nette\SmartObject;
 use Tracy\ILogger;
 
@@ -35,7 +38,7 @@ class ErrorPresenter extends Presenter
         }
 
         $this->logger->log($e, ILogger::EXCEPTION);
-        return new Responses\CallbackResponse(function (Http\IRequest $httpRequest, Http\IResponse $httpResponse): void {
+        return new CallbackResponse(function (IRequest $httpRequest, IResponse $httpResponse): void {
             if (preg_match('#^text/html(?:;|$)#', (string) $httpResponse->getHeader('Content-Type'))) {
                 require __DIR__ . '/templates/Error/500.phtml';
             }

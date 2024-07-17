@@ -5,10 +5,11 @@ use Nette\Application\UI\Presenter;
 
 abstract class BasePresenter extends Presenter
 {
-    public function beforeRender()
+    public function beforeRender(): void
     {
         parent::beforeRender();
 
         $this->template->webTitle = 'Game';
+        $this->template->cacheFix = '01010101';
     }
 }

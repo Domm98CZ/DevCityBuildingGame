@@ -23,7 +23,7 @@ services:
 
 parameters:
 	applicationEnv: "dev"
-	cacheEnabled: true
+	cacheEnabled: false
 	application:
 		name: "DevCityBuildingGame"
 		developer: "Dominik Procházka"

@@ -16,7 +16,6 @@ final readonly class CacheService
         private string $tmpDir
         , private bool $cacheEnabled
     ) {
-
     }
 
     /**

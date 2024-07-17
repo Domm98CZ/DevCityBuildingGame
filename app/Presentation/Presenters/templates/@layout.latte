@@ -6,9 +6,26 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="robots" content="index, follow">
+
+        {block styles}
+        <link rel="stylesheet" href="{$basePath}/node_modules/bootstrap/dist/css/bootstrap.min--{$cacheFix}.css">
+        <link rel="stylesheet" href="{$basePath}/node_modules/@fortawesome/fontawesome-pro/css/all.min--{$cacheFix}.css">
+        <link rel="stylesheet" href="{$basePath}/assets/css/main--{$cacheFix}.css">
+        {/block}
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+        <script type="text/javascript">$(function() {
+                $('#gameMapImage').maphilight();
+            });</script>
     </head>
     <body>
     tba
     {block content}{/block}
+
+    {block scripts}
+    <script src="{$basePath}/node_modules/bootstrap/dist/js/bootstrap.bundle.min--{$cacheFix}.js"></script>
+    <script src="{$basePath}/assets/js/jquery.maphilight.min--{$cacheFix}.js"></script>
+    {/block}
     </body>
 </html>

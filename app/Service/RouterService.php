@@ -20,13 +20,24 @@ final class RouterService
 //            'action' => 'default',
 //            'id' => null,
 //        ]);
-        $router->addRoute('//' . $prefix . '%domain%/%basePath%/<presenter>/<action>[/<id>]', [
-            'locale' => 'cs',
-            'module' => 'Web',
-            'presenter' => 'Homepage',
-            'action' => 'default',
-            'id' => null,
-        ]);
+
+        $router->withDomain('api.%domain%')
+            ->addRoute('<presenter>/<action>[/<id>]', [
+                'module' => 'Api',
+                'presenter' => 'Homepage',
+                'action' => 'default',
+                'id' => null,
+            ])
+        ;
+
+        $router->withDomain('%domain%')
+            ->addRoute('<presenter>/<action>[/<id>]', [
+                'module' => 'Web',
+                'presenter' => 'Homepage',
+                'action' => 'default',
+                'id' => null,
+            ])
+        ;
 
         return $router;
     }
