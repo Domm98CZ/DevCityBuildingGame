@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 namespace App\Data\Island;
 
-use App\Data\BasicEntity;
 use App\Data\BasicManager;
+use Nette\Database\Table\Selection;
 
 final class IslandManager extends BasicManager
 {
@@ -18,6 +18,7 @@ final class IslandManager extends BasicManager
             $this
             , $data[IslandRepository::COL_ID] ?? null
             , $data[IslandRepository::COL_NAME]
+            , $data[IslandRepository::COL_CODE]
             , $data[IslandRepository::COL_SEED]
             , $data[IslandRepository::COL_DATA]
             , $data[IslandRepository::COL_STARTED]
@@ -31,8 +32,31 @@ final class IslandManager extends BasicManager
         return $entity;
     }
 
-    public function create(string $name, string $seed, string $data): IslandEntity
+    public function create(string $name, string $code, string $seed, string $data): IslandEntity
     {
-        return new IslandEntity($this, null, $name, $seed, $data, false, false);
+        return new IslandEntity($this, null, $name, $code, $seed, $data, false, false);
+    }
+
+    public function getByCode(string $code): ?IslandEntity
+    {
+        $data = $this->repository->getIslandByCode($code)->fetch();
+        if ($data !== null) {
+            return $this->get($data[IslandRepository::COL_ID]);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return IslandEntity[]
+     */
+    public function getIslands(): array
+    {
+        $data = $this->repository->getIslands();
+        $list = [];
+        foreach ($data as $item) {
+            $list[$item[IslandRepository::COL_ID]] = $this->build($item->toArray());
+        }
+        return $list;
     }
 }

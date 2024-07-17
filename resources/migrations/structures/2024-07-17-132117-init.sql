@@ -57,6 +57,7 @@ create table if not exists "island"
 (
     id                 serial       not null,
     seed               varchar(100) not null,
+    code               varchar(64)  not null,
     name               varchar(200) not null,
     data               json         default null,
     started            boolean      not null default false,
@@ -65,6 +66,7 @@ create table if not exists "island"
     dt_ins             timestamp    not null default current_timestamp,
     dt_upd             timestamp    not null default current_timestamp,
     constraint pk_island primary key (id),
+    constraint unq_island_code unique (code),
     constraint unq_island_name unique (name)
 );
 

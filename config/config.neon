@@ -43,6 +43,10 @@ search:
 		in: %appDir%/Services
 		classes:
 			- *Service
+	commands:
+		in: %appDir%/Presentation/Commands
+		classes:
+			- *Command
 	data_managers:
 		in: %appDir%/Data
 		exclude:

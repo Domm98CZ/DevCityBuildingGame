@@ -45,6 +45,7 @@ final class MapService
 //        , 'L'   => '/assets/images/map/forest.png' // les
 //        , 'H'   => '' // hora
         , 'S'   => '/assets/images/map/sea.png' // moře
+        , 'J'   => '/assets/images/map/lake.png' // jezero
 //        , 'P'   => '' // hráč
 //        , 'V'   => '' // vesnice
     ];
@@ -61,7 +62,6 @@ final class MapService
         private readonly MapManager $mapManager
         , private readonly IslandManager $islandManager
     ) {
-
     }
 
     public function generateImage(?IslandEntity $islandEntity): Image
@@ -142,9 +142,9 @@ final class MapService
         $this->map = $map;
     }
 
-    public function generateMap(): void
+    public function generateMap(string $name, string $code): void
     {
-        $islandEntity = $this->islandManager->create('testovaci ostrov ' . Random::generate(32), $this->seed, Json::encode([
+        $islandEntity = $this->islandManager->create($name, $code, $this->seed, Json::encode([
             'forestProbability'         => $this->forestProbability
             , 'mountainProbability'     => $this->mountainProbability
             , 'lakeProbability'         => $this->lakeProbability
@@ -209,19 +209,19 @@ final class MapService
             }
         }
 
-        // safe spot - hráč
-        $safeCell = $this->findSafeEmptyCell($map, $this->rows, $this->cols, $seaLimit);
-        if ($safeCell !== null) {
-            $map[$safeCell[0]][$safeCell[1]] = 'P';
-        }
-
-        // safe spot - vesnice
-        for($i = 0; $i < $this->emptyVillages;$i++) {
-            $safeCell = $this->findSafeEmptyCell($map, $this->rows, $this->cols, $seaLimit);
-            if ($safeCell !== null) {
-                $map[$safeCell[0]][$safeCell[1]] = 'V';
-            }
-        }
+//        // safe spot - hráč
+//        $safeCell = $this->findSafeEmptyCell($map, $this->rows, $this->cols, $seaLimit);
+//        if ($safeCell !== null) {
+//            $map[$safeCell[0]][$safeCell[1]] = 'P';
+//        }
+//
+//        // safe spot - vesnice
+//        for($i = 0; $i < $this->emptyVillages;$i++) {
+//            $safeCell = $this->findSafeEmptyCell($map, $this->rows, $this->cols, $seaLimit);
+//            if ($safeCell !== null) {
+//                $map[$safeCell[0]][$safeCell[1]] = 'V';
+//            }
+//        }
 
         for ($i = 0; $i < $this->rows; $i++) {
             for ($j = 0; $j < $this->cols; $j++) {
@@ -354,5 +354,115 @@ final class MapService
         }
 
         return null; // Neexistuje cesta
+    }
+
+    public function getRows(): int
+    {
+        return $this->rows;
+    }
+
+    public function setRows(int $rows): MapService
+    {
+        $this->rows = $rows;
+        return $this;
+    }
+
+    public function getCols(): int
+    {
+        return $this->cols;
+    }
+
+    public function setCols(int $cols): MapService
+    {
+        $this->cols = $cols;
+        return $this;
+    }
+
+    public function getDefaultTerrainCosts(): float
+    {
+        return $this->defaultTerrainCosts;
+    }
+
+    public function setDefaultTerrainCosts(float $defaultTerrainCosts): MapService
+    {
+        $this->defaultTerrainCosts = $defaultTerrainCosts;
+        return $this;
+    }
+
+    public function getTerrainCosts(): array
+    {
+        return $this->terrainCosts;
+    }
+
+    public function setTerrainCosts(array $terrainCosts): MapService
+    {
+        $this->terrainCosts = $terrainCosts;
+        return $this;
+    }
+
+    public function getForestProbability(): float
+    {
+        return $this->forestProbability;
+    }
+
+    public function setForestProbability(float $forestProbability): MapService
+    {
+        $this->forestProbability = $forestProbability;
+        return $this;
+    }
+
+    public function getMountainProbability(): float
+    {
+        return $this->mountainProbability;
+    }
+
+    public function setMountainProbability(float $mountainProbability): MapService
+    {
+        $this->mountainProbability = $mountainProbability;
+        return $this;
+    }
+
+    public function getLakeProbability(): float
+    {
+        return $this->lakeProbability;
+    }
+
+    public function setLakeProbability(float $lakeProbability): MapService
+    {
+        $this->lakeProbability = $lakeProbability;
+        return $this;
+    }
+
+    public function getEmptyProbability(): float
+    {
+        return $this->emptyProbability;
+    }
+
+    public function setEmptyProbability(float $emptyProbability): MapService
+    {
+        $this->emptyProbability = $emptyProbability;
+        return $this;
+    }
+
+    public function getSeaProbability(): float
+    {
+        return $this->seaProbability;
+    }
+
+    public function setSeaProbability(float $seaProbability): MapService
+    {
+        $this->seaProbability = $seaProbability;
+        return $this;
+    }
+
+    public function getEmptyVillages(): int
+    {
+        return $this->emptyVillages;
+    }
+
+    public function setEmptyVillages(int $emptyVillages): MapService
+    {
+        $this->emptyVillages = $emptyVillages;
+        return $this;
     }
 }

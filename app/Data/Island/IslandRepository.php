@@ -2,6 +2,7 @@
 namespace App\Data\Island;
 
 use App\Data\BasicRepository;
+use Nette\Database\Table\Selection;
 
 final class IslandRepository extends BasicRepository
 {
@@ -17,6 +18,7 @@ final class IslandRepository extends BasicRepository
             self::COL_ID            => self::COL_ID
             , self::COL_NAME        => self::COL_NAME
             , self::COL_SEED        => self::COL_SEED
+            , self::COL_CODE        => self::COL_CODE
             , self::COL_DATA        => self::COL_DATA
             , self::COL_STARTED     => self::COL_STARTED
             , self::COL_FINISHED    => self::COL_FINISHED
@@ -24,5 +26,17 @@ final class IslandRepository extends BasicRepository
             , self::COL_DT_UPD      => self::COL_DT_UPD
             , self::COL_ENABLED     => self::COL_ENABLED
         ];
+    }
+
+    public function getIslands(): Selection
+    {
+        return $this->db->table(self::TABLE)
+            ->where(self::COL_ENABLED, true);
+    }
+
+    public function getIslandByCode(string $code): Selection
+    {
+        return $this->getIslands()
+            ->where(self::COL_CODE, $code);
     }
 }

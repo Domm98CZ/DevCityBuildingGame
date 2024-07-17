@@ -13,13 +13,10 @@ final class HomepagePresenter extends BasePresenter
 
     }
 
-    public function actionDefault(?string $id = null): void
+    public function actionDetail(string $id): void
     {
-        if ($id !== null) {
-            $this->mapService->setSeed($id);
-        }
-
-        $this->mapService->loadMap($this->islandManager->get(1));
+        $island = $this->islandManager->getByCode($id);
+        $this->mapService->loadMap($island);
 
         $cellWidth = $this->mapService->getCfg()[0] / $this->mapService->getCfg()[2];
         $cellHeight = $this->mapService->getCfg()[1] / $this->mapService->getCfg()[3];
@@ -27,9 +24,14 @@ final class HomepagePresenter extends BasePresenter
         $this->template->cellWidth = $cellWidth;
         $this->template->cellHeight = $cellHeight;
         $this->template->cells = $this->mapService->getMap();
-        $this->template->seed = $id;
+        $this->template->island = $island;
 
-        bdump($this->mapService->calculate2dDistance(9, 6, 9, 9));
-        bdump($this->mapService->calculate3dDistance(9, 6, 9, 9));
+//        bdump($this->mapService->calculate2dDistance(9, 6, 9, 9));
+//        bdump($this->mapService->calculate3dDistance(9, 6, 9, 9));
+    }
+
+    public function actionDefault(): void
+    {
+        $this->template->islands = $this->islandManager->getIslands();
     }
 }

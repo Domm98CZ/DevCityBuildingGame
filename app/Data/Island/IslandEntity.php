@@ -10,6 +10,7 @@ final class IslandEntity extends BasicEntity
         IslandManager $mapManager
         , ?int $id
         , private string $name
+        , private string $code
         , private string $seed
         , private string $data
         , private bool $started
@@ -73,12 +74,24 @@ final class IslandEntity extends BasicEntity
         return $this;
     }
 
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): IslandEntity
+    {
+        $this->code = $code;
+        return $this;
+    }
+
     public function copy(): IslandEntity
     {
         return new IslandEntity(
             $this->getManager()
             , $this->getId()
             , $this->getName()
+            , $this->getCode()
             , $this->getSeed()
             , $this->getData()
             , $this->isStarted()
