@@ -29,7 +29,20 @@ final class RouterService
                 'id' => null,
             ])
         ;
+
         $router->withDomain('play.%domain%')
+            ->addRoute('admin/<presenter>/<action>[/<id>]', [
+                'module' => 'Admin',
+                'presenter' => 'Homepage',
+                'action' => 'default',
+                'id' => null,
+            ])
+            ->addRoute('island[/<id>]', [
+                'module' => 'Game',
+                'presenter' => 'Game',
+                'action' => 'default',
+                'id' => null,
+            ])
             ->addRoute('<presenter>/<action>[/<id>]', [
                 'module' => 'Game',
                 'presenter' => 'Homepage',

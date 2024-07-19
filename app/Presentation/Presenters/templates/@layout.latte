@@ -13,19 +13,73 @@
         <link rel="stylesheet" href="{$basePath}/assets/css/main--{$cacheFix}.css">
         {/block}
 
-        <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-
-        <script type="text/javascript">$(function() {
-                $('#gameMapImage').maphilight();
-            });</script>
+        {block headerScripts}
+        <script type="text/javascript" src="{$basePath}/node_modules/jquery/dist/jquery.min.js"></script>
+        {/block}
     </head>
-    <body class="bg-dark text-light">
-    tba
-    {block content}{/block}
+    <body data-bs-theme="dark">
+    <header class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container">
+                <a class="navbar-brand" href="{link :Web:Homepage:default}"><i class="fas fa-gamepad"></i> {$webTitle}</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        {block navigation}
+                        <li class="nav-item">
+                            <a class="nav-link{if $presenter->isLinkCurrent(':Web:Blog:*')} active{/if}" href="{link :Web:Blog:default}">{_title.blog}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link{if $presenter->isLinkCurrent(':Web:About:*')} active{/if}" href="{link :Web:About:default}">{_title.about}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link{if $presenter->isLinkCurrent(':Web:Contact:*')} active{/if}" href="{link :Web:Contact:default}">{_title.contact}</a>
+                        </li>
+                        {if $user->isLoggedIn() && in_array(App\Business\Enums\AccountType::ADMIN->getName(), $user->getRoles(), true)}
+                        <li class="nav-item">
+                            <a class="nav-link{if $presenter->isLinkCurrent(':Admin:Homepage:*')} active{/if}" href="{link :Admin:Homepage:default}">{_title.adminpanel}</a>
+                        </li>
+                        {/if}
+                        {/block}
+                    </ul>
+                    <span class="navbar-text">
+                    {block info}{/block}
+                    {if $user->isLoggedIn()}
+                        <strong>{$user->getIdentity()->getData()['name']??$user->getIdentity()->getData()['username']}</strong>
+                        <a href="{link :Game:Auth:logout}">{_button.logout}</a>
+                    {/if}
+                    </span>
+                </div>
+            </div>
+    </header>
+    <main class="container py-4">
+        {block content}{/block}
+        <footer class="pt-3 mt-4 text-body-secondary border-top">
+            &copy; 2024 {$webTitle}
+        </footer>
+    </main>
 
     {block scripts}
     <script src="{$basePath}/node_modules/bootstrap/dist/js/bootstrap.bundle.min--{$cacheFix}.js"></script>
+    <script src="{$basePath}/node_modules/nette-forms/src/assets/netteForms.min--{$cacheFix}.js"></script>
+    <script src="{$basePath}/assets/js/nette.ajax--{$cacheFix}.js"></script>
     <script src="{$basePath}/assets/js/jquery.maphilight.min--{$cacheFix}.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.nette.init();
+            $.nette.ext('redirect');
+            $.nette.ext('abort', null);
+            $.nette.ext('unique', null);
+            $.nette.ext("ajaxRedirect", {
+                success: function (payload) {
+                    if (payload.redirect) {
+                        $.nette.ajax(payload.redirect);
+                    }
+                }
+            });
+        });
+    </script>
     {/block}
     </body>
 </html>

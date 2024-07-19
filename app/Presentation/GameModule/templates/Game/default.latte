@@ -1,0 +1,59 @@
+{varType App\Data\Island\IslandEntity $island}
+{block headerScripts}
+{include parent}
+<script type="text/javascript">
+$(function() {
+    $('#gameMapImage').maphilight();
+});
+</script>
+{/block}
+
+{block title}{$island->getTitle()}{/block}
+{block info}{$island->getTitle()}{/block}
+
+{block content}
+<div class="gameSpace">
+    <div class="row">
+        <div class="col-8">
+            {snippet gameMap}
+                <a href="{link reload!}" class="ajax">{_button.reload}</a> {time()}
+
+            <img id="gameMapImage" src="{link :Api:Map:image $island->getCode()}" class="img-fluid" usemap="#gameMap" alt="Game map" style="width:{$imageWidth}px!important;height:{$imageHeight}px!important;"/>
+            <map name="gameMap">
+            {if $isAccountJoined}
+                {foreach $tiles as $row}
+                    {foreach $row as $tile}
+                        {if App\Business\Enums\TerrainType::getEnumByTitle($tile->getType())->isClickable()}
+                            <area href="{link tileDetail! $island->getCode(), $tile->getId()}" class="ajax" shape="rect" coords="{($tile->getY() + 0) * $cellWidth},{($tile->getX() + 0) * $cellHeight},{($tile->getY() + 1) * $cellWidth},{($tile->getX() + 1) * $cellHeight}" alt="{$tile->getTitle()}" title="{$tile->getTitle()}">
+                        {/if}
+                    {/foreach}
+                {/foreach}
+            {/if}
+            </map>
+            {/snippet}
+        </div>
+        <div class="col-4">
+            {snippet gamePanel}
+            {if $isAccountJoined}
+                // todo - asi statistiky bo co + klikátka
+                <br>
+
+                {snippet tile}{time()} {ifset $tileId}xxx {$tileId}{/ifset}{/snippet}
+            {else}
+                <div class="mb-2">
+                    <a href="{link joinIsland! $island->getCode()}" class="ajax">{_button.join_island}</a>
+                </div>
+                <div class="mb-2">
+                    <span>{_label.already_joined_players}:</span>
+                    <ul>
+                        {foreach $players as $player}
+                        <li>{$player->getTitle()}</li>
+                        {/foreach}
+                    </ul>
+                </div>
+            {/if}
+            {/snippet}
+        </div>
+    </div>
+</div>
+{/block}

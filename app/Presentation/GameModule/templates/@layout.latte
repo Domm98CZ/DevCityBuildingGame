@@ -1,2 +1,10 @@
 {layout '../../Presenters/templates/@layout.latte'}
 
+{block navigation}
+{include parent}
+{if $user->isLoggedIn()}
+<li class="nav-item">
+    <a class="nav-link{if $presenter->isLinkCurrent(':Game:Homepage:*')} active{/if}" href="{link :Game:Homepage:default}">{_title.gamepanel}</a>
+</li>
+{/if}
+{/block}

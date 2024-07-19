@@ -19,6 +19,7 @@ translation:
 	returnOriginalMessage: true
 
 services:
+	authenticator: App\Business\AccountAuthenticator
 	router: App\Services\RouterService::createRouter(%application.prefix%)
 	- App\Services\CacheService(%tempDir%, %cacheEnabled%)
 
@@ -29,6 +30,9 @@ parameters:
 		host: ''
 		dbname: ''
 		user: ''
+		password: ''
+	redisConnection:
+		host: ''
 		password: ''
 	cacheEnabled: false
 	application:
@@ -43,6 +47,10 @@ search:
 		in: %appDir%/Services
 		classes:
 			- *Service
+	controllers:
+		in: %appDir%/Business/Controllers
+		classes:
+			- *Controller
 	commands:
 		in: %appDir%/Presentation/Commands
 		classes:
@@ -61,6 +69,10 @@ search:
 				- App\Data\BasicRepository
 		classes:
 			- *Repository
+	game_forms:
+		in: %appDir%/Presentation/GameModule/Components/Forms
+		classes:
+			- *Factory
 
 session:
 	autoStart: always

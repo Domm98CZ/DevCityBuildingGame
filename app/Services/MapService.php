@@ -1,56 +1,32 @@
 <?php declare(strict_types=1);
-
 namespace App\Services;
 
+use App\Business\Enums\TerrainType;
 use App\Data\CalculationNode;
 use App\Data\Island\IslandEntity;
 use App\Data\Island\IslandManager;
+use App\Data\Map\MapEntity;
 use App\Data\Map\MapManager;
 use App\Data\Map\MapRepository;
 use GdImage;
 use Nette\Utils\Image;
 use Nette\Utils\ImageColor;
 use Nette\Utils\Json;
-use Nette\Utils\Random;
 
 final class MapService
 {
     private int $imageWidth = 800;
     private int $imageHeight = 800;
-    private int $rows = 20;
-    private int $cols = 20;
-    private array $mapObjects = [
-        'L', 'H', 'J'
-    ];
-    private array $mapObjectColors = [
-        ''      => [221, 232, 172] // prázdno
-        , 'L'   => [34, 139, 34]   // les
-        , 'J'   => [0, 0, 255]     // jezero
-        , 'H'   => [105, 105, 105] // hora
-        , 'S'   => [0, 105, 148]   // moře
-        , 'P'   => [255, 0, 0]     // hráč
-        , 'V'   => [255, 140, 0]   // vesnice
-    ];
-    private float $defaultTerrainCosts = 1.0;
-    private array $terrainCosts = [
-        'L' => 1.5,
-        'H' => 2
-    ];
+    private int $rows = 25;
+    private int $cols = 25;
     private array $directions = [
         [-1, 0], [1, 0], [0, -1], [0, 1], // N, S, W, E
         [-1, -1], [-1, 1], [1, -1], [1, 1] // NW, NE, SW, SE
     ];
-    private array $imagePaths  = [
-        ''      => '/assets/images/map/plains.png' // prázdno
-//        , 'L'   => '/assets/images/map/forest.png' // les
-//        , 'H'   => '' // hora
-        , 'S'   => '/assets/images/map/sea.png' // moře
-        , 'J'   => '/assets/images/map/lake.png' // jezero
-//        , 'P'   => '' // hráč
-//        , 'V'   => '' // vesnice
-    ];
     private array $map;
-    private float $forestProbability = 0.6;
+    /** @var MapEntity[][][] */
+    private array $mapTiles;
+    private float $forrestProbability = 0.6;
     private float $mountainProbability = 0.4;
     private float $lakeProbability = 0.25;
     private float $emptyProbability = 0.95;
@@ -64,7 +40,7 @@ final class MapService
     ) {
     }
 
-    public function generateImage(?IslandEntity $islandEntity): Image
+    public function generateImage(IslandEntity $islandEntity): Image
     {
         $bgColorRgb = ImageColor::rgb(0, 0, 0);
         $fnColorRgb = ImageColor::rgb(255, 255, 255);
@@ -84,30 +60,27 @@ final class MapService
         $minCellSize = min($rowHeight, $colWidth);
         $fontSize = max(1, min(5, intval($minCellSize / 10)));
 
-        // generator mapy
-        if ($islandEntity instanceof IslandEntity) {
-            $this->loadMap($islandEntity);
-        } else {
-            $this->generateMap();
-        }
+        $this->loadMap($islandEntity);
 
         // vykreslení písmen do mapy
         for ($i = 0; $i < $this->rows; $i++) {
             for ($j = 0; $j < $this->cols; $j++) {
                 $char = $this->map[$i][$j];
 
-                if (isset($this->imagePaths[$char])) {
-                    $this->drawObjectImage($im, $this->imagePaths[$char], $j * $colWidth,  $i * $rowHeight, $colWidth, $rowHeight);
+                $terrainTypeEnum = TerrainType::getEnumByTitle($char);
+                if ($terrainTypeEnum->getImage() !== null) {
+                    $this->drawObjectImage($im, $terrainTypeEnum->getImage(), $j * $colWidth,  $i * $rowHeight, $colWidth, $rowHeight);
                 } else {
-                    $bgColor = imagecolorallocate($im, $this->mapObjectColors[$char][0], $this->mapObjectColors[$char][1], $this->mapObjectColors[$char][2]);
+                    $tileColor = $terrainTypeEnum->getColor();
+                    $bgColor = imagecolorallocate($im, $tileColor->red, $tileColor->green, $tileColor->blue);
                     imagefilledrectangle($im, $j * $colWidth, $i * $rowHeight, ($j + 1) * $colWidth, ($i + 1) * $rowHeight, $bgColor);
                 }
 
-                if ($char != '') {
-                    $x = (int) ceil($j * $colWidth + ($colWidth / 2) - (imagefontwidth($fontSize) / 2));
-                    $y = (int) ceil($i * $rowHeight + ($rowHeight / 2) - (imagefontheight($fontSize) / 2));
-                    imagestring($im, $fontSize, $x, $y, $char, $txColor);
-                }
+//                if ($char !== TerrainType::PLAINS->getTitle()) {
+//                    $x = (int) ceil($j * $colWidth + ($colWidth / 2) - (imagefontwidth($fontSize) / 2));
+//                    $y = (int) ceil($i * $rowHeight + ($rowHeight / 2) - (imagefontheight($fontSize) / 2));
+//                    imagestring($im, $fontSize, $x, $y, $char, $txColor);
+//                }
             }
         }
 
@@ -131,21 +104,26 @@ final class MapService
     public function loadMap(IslandEntity $islandEntity): void
     {
         $mapEntity = $this->mapManager->getMapEntityByIsland($islandEntity);
-        $islandSettings = Json::decode($islandEntity->getData(), true);
-
-        $map = array_fill(0, $islandSettings['rows'], array_fill(0, $islandSettings['cols'], ''));
-
+//        $islandSettings = $islandEntity->getDataDecoded();
+//        $map = array_fill(0, $islandSettings['rows'], array_fill(0, $islandSettings['cols'], TerrainType::PLAINS->getTitle()));
         foreach ($mapEntity as $entity) {
-            $map[$entity[MapRepository::COL_X]][$entity[MapRepository::COL_Y]] = $entity[MapRepository::COL_TYPE];
+            $this->map[$entity[MapRepository::COL_X]][$entity[MapRepository::COL_Y]] = $entity[MapRepository::COL_TYPE];
+            $this->mapTiles[$entity[MapRepository::COL_X]][$entity[MapRepository::COL_Y]] = $this->mapManager->build($entity->toArray());
         }
+        bdump($this->map[6][16]);
+        bdump($this->map[6][17]);
+//        $this->map = $map;
+    }
 
-        $this->map = $map;
+    public function getSeaLimit(): int
+    {
+        return (int) ceil(min($this->rows, $this->cols) * 0.1);
     }
 
     public function generateMap(string $name, string $code): void
     {
         $islandEntity = $this->islandManager->create($name, $code, $this->seed, Json::encode([
-            'forestProbability'         => $this->forestProbability
+            'forrestProbability'        => $this->forrestProbability
             , 'mountainProbability'     => $this->mountainProbability
             , 'lakeProbability'         => $this->lakeProbability
             , 'emptyProbability'        => $this->emptyProbability
@@ -153,23 +131,24 @@ final class MapService
             , 'emptyVillages'           => $this->emptyVillages
             , 'rows'                    => $this->rows
             , 'cols'                    => $this->cols
+            , 'imageWidth'              => $this->imageWidth
+            , 'imageHeight'             => $this->imageHeight
         ]));
         $islandEntity->save();
-
         mt_srand(crc32($this->seed));
 
         // vygenerování mapy
-        $map = array_fill(0, $this->rows, array_fill(0, $this->cols, ''));
+        $map = array_fill(0, $this->rows, array_fill(0, $this->cols, TerrainType::PLAINS->getTitle()));
 
         // vygenerování moře
-        $seaLimit = ceil(min($this->rows, $this->cols) * 0.1);
+        $seaLimit = $this->getSeaLimit();
         for ($i = 0; $i < $this->rows; $i++) {
-            $map[$i][0] = 'S';
-            $map[$i][$this->cols - 1] = 'S';
+            $map[$i][0] = TerrainType::SEA->getTitle();
+            $map[$i][$this->cols - 1] = TerrainType::SEA->getTitle();
         }
         for ($j = 0; $j < $this->cols; $j++) {
-            $map[0][$j] = 'S';
-            $map[$this->rows - 1][$j] = 'S';
+            $map[0][$j] = TerrainType::SEA->getTitle();
+            $map[$this->rows - 1][$j] = TerrainType::SEA->getTitle();
         }
 
         for ($layer = 1; $layer < $seaLimit; $layer++) {
@@ -178,10 +157,10 @@ final class MapService
                 for ($j = $layer; $j < $this->cols - $layer; $j++) {
                     if (
                         ($i === $layer || $i === $this->rows - $layer - 1 || $j === $layer || $j === $this->cols - $layer - 1) ||
-                        (isset($map[$i][$j]) && $map[$i][$j] === 'S')
+                        (isset($map[$i][$j]) && $map[$i][$j] === TerrainType::SEA->getTitle())
                     ) {
                         if (mt_rand(0, 100) / 100.0 < $probability) {
-                            $map[$i][$j] = 'S'; // Moře
+                            $map[$i][$j] = TerrainType::SEA->getTitle(); // Moře
                         }
                     }
                 }
@@ -191,18 +170,19 @@ final class MapService
         // entity mapy
         for ($i = 0; $i < $this->rows; $i++) {
             for ($j = 0; $j < $this->cols; $j++) {
-                if ($map[$i][$j] === '') {
+                if ($map[$i][$j] === TerrainType::PLAINS->getTitle()) {
                     if (mt_rand(0, 100) / 100.0 < $this->emptyProbability) {
-                        $map[$i][$j] = '';
+                        $map[$i][$j] = TerrainType::PLAINS->getTitle();
                     } else {
-                        $char = $this->mapObjects[array_rand($this->mapObjects)];
+                        $char = TerrainType::getDefaultTypes()[array_rand(TerrainType::getDefaultTypes())]->getTitle();
                         $map[$i][$j] = $char;
-                        if ($char === 'L') {
-                            self::placeObject($map, $this->rows, $this->cols, $i, $j, 'L', $this->forestProbability);
-                        } elseif ($char === 'H') {
-                            self::placeObject($map, $this->rows, $this->cols, $i, $j, 'H', $this->mountainProbability);
-                        } elseif ($char === 'J') {
-                            self::placeObject($map, $this->rows, $this->cols, $i, $j, 'H', $this->lakeProbability);
+
+                        if ($char === TerrainType::FORREST->getTitle()) {
+                            self::placeObject($map, $this->rows, $this->cols, $i, $j, TerrainType::FORREST->getTitle(), $this->forrestProbability);
+                        } elseif ($char === TerrainType::MOUNTAINS->getTitle()) {
+                            self::placeObject($map, $this->rows, $this->cols, $i, $j, TerrainType::MOUNTAINS->getTitle(), $this->mountainProbability);
+                        } elseif ($char === TerrainType::LAKE->getTitle()) {
+                            self::placeObject($map, $this->rows, $this->cols, $i, $j, TerrainType::LAKE->getTitle(), $this->lakeProbability);
                         }
                     }
                 }
@@ -225,26 +205,25 @@ final class MapService
 
         for ($i = 0; $i < $this->rows; $i++) {
             for ($j = 0; $j < $this->cols; $j++) {
-                if ($map[$i][$j] !== '') {
-                    $this->mapManager->create($islandEntity, $map[$i][$j], $i, $j)->save();
-                }
+                $this->mapManager->create($islandEntity, $map[$i][$j], $i, $j)->save();
             }
         }
 
         $this->map = $map;
     }
 
-    private function isSafe(int $rows, int $cols, int $i, int $j, float $seaLimit): bool
+    private function isSafe(int $i, int $j, float $seaLimit): bool
     {
-        return $i >= $seaLimit && $i < $rows - $seaLimit && $j >= $seaLimit && $j < $cols - $seaLimit;
+        return $i >= $seaLimit && $i < $this->rows - $seaLimit && $j >= $seaLimit && $j < $this->cols - $seaLimit;
     }
 
-    public function findSafeEmptyCell(array $map, int $rows, int $cols, float $seaLimit): ?array
+    public function findSafeEmptyCell(): ?array
     {
+        $seaLimit = $this->getSeaLimit();
         $emptyCells = [];
-        for ($i = 0; $i < $rows; $i++) {
-            for ($j = 0; $j < $cols; $j++) {
-                if ($map[$i][$j] === '' && $this->isSafe($rows, $cols, $i, $j, $seaLimit)) {
+        for ($i = 0; $i < $this->rows; $i++) {
+            for ($j = 0; $j < $this->cols; $j++) {
+                if ($this->map[$i][$j] === TerrainType::PLAINS->getTitle() && $this->isSafe($i, $j, $seaLimit)) {
                     $emptyCells[] = [$i, $j];
                 }
             }
@@ -262,6 +241,14 @@ final class MapService
         return $this->map;
     }
 
+    /**
+     * @return MapEntity[][][]
+     */
+    public function getMapTiles(): array
+    {
+        return $this->mapTiles;
+    }
+
     public function getCfg(): array
     {
         return [
@@ -275,7 +262,7 @@ final class MapService
         foreach ($this->directions as $dir) {
             $ni = $i + $dir[0];
             $nj = $j + $dir[1];
-            if ($ni >= 0 && $ni < $rows && $nj >= 0 && $nj < $cols && $map[$ni][$nj] === '') {
+            if ($ni >= 0 && $ni < $rows && $nj >= 0 && $nj < $cols && $map[$ni][$nj] === TerrainType::PLAINS->getTitle()) {
                 if (rand(0, 100) / 100.0 < $probability) {
                     $map[$ni][$nj] = $object;
                 }
@@ -339,13 +326,13 @@ final class MapService
                 $newY = $currentNode->getY() + $direction[1];
 
                 if (isset($this->map[$newX][$newY]) && !isset($closedList[$newX][$newY])) {
-                    $terrainType = $this->map[$newX][$newY];
+                    $char = $this->map[$newX][$newY];
 
-                    if ($terrainType === 'J' || $terrainType === 'S') {
-                        continue; // Neumíš plavat
+                    if ($char === TerrainType::SEA->getTitle()) {
+                        continue; // Neumíš plavat v moři (jezera zvládneš)
                     }
 
-                    $newCost = $currentNode->getCost() + ($this->terrainCosts[$terrainType] ?? $this->defaultTerrainCosts);
+                    $newCost = $currentNode->getCost() + (TerrainType::getEnumByTitle($char)->getTravelCosts());
                     $heuristic = abs($newX - $x2) + abs($newY - $y2);
                     $newNode = new CalculationNode($newX, $newY, $newCost, $heuristic, $currentNode);
                     array_push($openList, $newNode);
@@ -378,36 +365,14 @@ final class MapService
         return $this;
     }
 
-    public function getDefaultTerrainCosts(): float
+    public function getForrestProbability(): float
     {
-        return $this->defaultTerrainCosts;
+        return $this->forrestProbability;
     }
 
-    public function setDefaultTerrainCosts(float $defaultTerrainCosts): MapService
+    public function setForrestProbability(float $forrestProbability): MapService
     {
-        $this->defaultTerrainCosts = $defaultTerrainCosts;
-        return $this;
-    }
-
-    public function getTerrainCosts(): array
-    {
-        return $this->terrainCosts;
-    }
-
-    public function setTerrainCosts(array $terrainCosts): MapService
-    {
-        $this->terrainCosts = $terrainCosts;
-        return $this;
-    }
-
-    public function getForestProbability(): float
-    {
-        return $this->forestProbability;
-    }
-
-    public function setForestProbability(float $forestProbability): MapService
-    {
-        $this->forestProbability = $forestProbability;
+        $this->forrestProbability = $forrestProbability;
         return $this;
     }
 

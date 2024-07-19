@@ -11,3 +11,6 @@ parameters:
 		dbname: 'xyz'
 		user: 'not_root'
 		password: 'qwerty'
+	redisConnection:
+		host: 'redis'
+		password: 'redispwd'

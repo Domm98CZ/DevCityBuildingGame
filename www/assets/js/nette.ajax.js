@@ -561,6 +561,7 @@
     $.nette.ext('init', {
         load: function (rh) {
             $(this.linkSelector).off('click.nette', rh).on('click.nette', rh);
+            $('area.ajax').off('click.nette', rh).on('click.nette', rh);
             $(this.formSelector).off('submit.nette', rh).on('submit.nette', rh)
                 .off('click.nette', ':image', rh).on('click.nette', ':image', rh)
                 .off('click.nette', ':submit', rh).on('click.nette', ':submit', rh);

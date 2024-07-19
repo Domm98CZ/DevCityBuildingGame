@@ -3,18 +3,31 @@ namespace App\Data\Map;
 
 use App\Data\BasicEntity;
 use App\Data\Island\IslandEntity;
+use App\Data\Player\PlayerEntity;
 
 final class MapEntity extends BasicEntity
 {
     public function __construct(
-        MapManager $mapManager
+        MapManager $manager
+        , private ?PlayerEntity $playerEntity
         , private IslandEntity $islandEntity
         , ?int $id
         , private string $type
         , private int $x
         , private int $y
     ) {
-        parent::__construct($mapManager, $id);
+        parent::__construct($manager, $id);
+    }
+
+    public function getPlayerEntity(): ?PlayerEntity
+    {
+        return $this->playerEntity;
+    }
+
+    public function setPlayerEntity(?PlayerEntity $playerEntity): MapEntity
+    {
+        $this->playerEntity = $playerEntity;
+        return $this;
     }
 
     public function getIslandEntity(): IslandEntity
@@ -61,10 +74,16 @@ final class MapEntity extends BasicEntity
         return $this;
     }
 
+    public function getTitle(): string
+    {
+        return sprintf('[%dx%d] T:%s P:%s', $this->getX(), $this->getY(), $this->getType(), $this->getPlayerEntity()?->getAccountEntity()->getId());
+    }
+
     public function copy(): MapEntity
     {
         return new MapEntity(
             $this->getManager()
+            , $this->getPlayerEntity()
             , $this->getIslandEntity()
             , $this->getId()
             , $this->getType()

@@ -3,13 +3,13 @@ namespace App\Data\Map;
 
 use App\Data\BasicRepository;
 use App\Data\Island\IslandEntity;
-use App\Data\Island\IslandRepository;
 use Nette\Database\Table\Selection;
 
 final class MapRepository extends BasicRepository
 {
     public const TABLE = 'map';
     public const COL_TYPE = 'type';
+    public const COL_ID_PLAYER = 'id_player';
     public const COL_ID_ISLAND = 'id_island';
     public const COL_X = 'x';
     public const COL_Y = 'y';
@@ -19,6 +19,7 @@ final class MapRepository extends BasicRepository
         return [
             self::COL_ID            => self::COL_ID
             , self::COL_TYPE        => self::COL_TYPE
+            , 'playerEntity'        => self::COL_ID_PLAYER
             , 'islandEntity'        => self::COL_ID_ISLAND
             , self::COL_X           => self::COL_X
             , self::COL_Y           => self::COL_Y
@@ -38,5 +39,13 @@ final class MapRepository extends BasicRepository
     {
         return $this->getMapEntitySelection()
             ->where(self::COL_ID_ISLAND, $islandEntity->getId());
+    }
+
+    public function getIslandTileByCoords(IslandEntity $islandEntity, int $x, int $y): Selection
+    {
+        return $this->getMapEntitySelection()
+            ->where(self::COL_ID_ISLAND, $islandEntity->getId())
+            ->where(self::COL_X, $x)
+            ->where(self::COL_Y, $y);
     }
 }

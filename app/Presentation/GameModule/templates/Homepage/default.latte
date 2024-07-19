@@ -3,7 +3,7 @@
 <div class="container">
 <ul>
     {foreach $islands as $island}
-    <li><a href="{link :Game:Homepage:detail $island->getCode()}">[{$island->getCode()}] {$island->getName()}</a></li>
+    <li><a href="{link :Game:Game:default $island->getCode()}">{$island->getTitle()}</a></li>
     {/foreach}
 </ul>
 </div>

@@ -1,0 +1,53 @@
+{block styles}
+{include parent}
+<style>
+html,
+body {
+    height: 100%;
+}
+
+.form-login {
+    max-width: 330px;
+    padding: 1rem;
+}
+
+.form-login .form-floating:focus-within {
+    z-index: 2;
+}
+
+.form-login input[name="{App\Presentation\GameModule\Components\Forms\LoginForm\LoginFormControl::INPUT_USERNAME}"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.form-login input[type="{App\Presentation\GameModule\Components\Forms\LoginForm\LoginFormControl::INPUT_PASSWORD}"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+</style>
+{/block}
+
+{block title}{_title.login}{/block}
+
+{block content}
+<div class="form-login w-100 m-auto">
+{snippet loginForm}
+    {form loginForm}
+        <h1 class="h3 mb-3 fw-normal">{_title.login}</h1>
+
+        <div class="form-floating">
+            <input n:name="App\Presentation\GameModule\Components\Forms\LoginForm\LoginFormControl::INPUT_USERNAME" class="form-control" id="floatingLogin">
+            <label for="floatingLogin">{_label.username}</label>
+        </div>
+        <div class="form-floating">
+            <input n:name="App\Presentation\GameModule\Components\Forms\LoginForm\LoginFormControl::INPUT_PASSWORD" class="form-control" id="floatingPassword">
+            <label for="floatingPassword">{_label.password}</label>
+        </div>
+
+        <button n:name="App\Presentation\GameModule\Components\Forms\LoginForm\LoginFormControl::INPUT_SUBMIT" class="btn btn-primary w-100 py-2" type="submit">{_button.login}</button>
+    {/form}
+{/snippet}
+</div>
+{/block}

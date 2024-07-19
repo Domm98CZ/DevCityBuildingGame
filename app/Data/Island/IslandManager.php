@@ -2,7 +2,6 @@
 namespace App\Data\Island;
 
 use App\Data\BasicManager;
-use Nette\Database\Table\Selection;
 
 final class IslandManager extends BasicManager
 {
@@ -43,14 +42,23 @@ final class IslandManager extends BasicManager
         if ($data !== null) {
             return $this->get($data[IslandRepository::COL_ID]);
         }
-
         return null;
+    }
+
+    public function getStartedIslands(): array
+    {
+        $data = $this->repository->getStartedIslands();
+        $list = [];
+        foreach ($data as $item) {
+            $list[$item[IslandRepository::COL_ID]] = $this->build($item->toArray());
+        }
+        return $list;
     }
 
     /**
      * @return IslandEntity[]
      */
-    public function getIslands(): array
+    public function getAllIslands(): array
     {
         $data = $this->repository->getIslands();
         $list = [];

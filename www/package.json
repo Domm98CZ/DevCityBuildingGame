@@ -1,8 +1,11 @@
 {
     "private": true,
     "dependencies": {
+        "@fortawesome/fontawesome-pro": "*",
         "@popperjs/core": "*",
         "bootstrap": "*",
-        "moment": "*"
+        "moment": "*",
+        "nette-forms": "^3.2.0",
+        "jquery": "^3.7.1"
     }
 }

@@ -34,6 +34,13 @@ final class IslandRepository extends BasicRepository
             ->where(self::COL_ENABLED, true);
     }
 
+    public function getStartedIslands(): Selection
+    {
+        return $this->db->table(self::TABLE)
+            ->where(self::COL_ENABLED, true)
+            ->where(self::COL_STARTED, true);
+    }
+
     public function getIslandByCode(string $code): Selection
     {
         return $this->getIslands()

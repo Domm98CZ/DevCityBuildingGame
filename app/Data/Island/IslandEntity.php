@@ -3,11 +3,12 @@ namespace App\Data\Island;
 
 use App\Data\BasicEntity;
 use App\Data\Map\MapManager;
+use Nette\Utils\Json;
 
 final class IslandEntity extends BasicEntity
 {
     public function __construct(
-        IslandManager $mapManager
+        IslandManager $manager
         , ?int $id
         , private string $name
         , private string $code
@@ -16,7 +17,7 @@ final class IslandEntity extends BasicEntity
         , private bool $started
         , private bool $finished
     ) {
-        parent::__construct($mapManager, $id);
+        parent::__construct($manager, $id);
     }
 
     public function getName(): string
@@ -44,6 +45,11 @@ final class IslandEntity extends BasicEntity
     public function getData(): string
     {
         return $this->data;
+    }
+
+    public function getDataDecoded(): array
+    {
+        return Json::decode($this->getData(), true);
     }
 
     public function setData(string $data): IslandEntity
@@ -83,6 +89,11 @@ final class IslandEntity extends BasicEntity
     {
         $this->code = $code;
         return $this;
+    }
+
+    public function getTitle(): string
+    {
+        return sprintf('[%s] %s', $this->getCode(), $this->getName());
     }
 
     public function copy(): IslandEntity

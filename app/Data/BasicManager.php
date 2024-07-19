@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Data;
 
+use App\Business\Exceptions\EntityNotFoundException;
 use Tracy\Debugger;
 
 abstract class BasicManager
@@ -13,7 +14,6 @@ abstract class BasicManager
     public function __construct(
         protected readonly BasicRepository $repository
     ) {
-
     }
 
     public function get(int $id): BasicEntity
@@ -25,7 +25,7 @@ abstract class BasicManager
             }
         }
 
-        return $this->entity[$id];
+        return $this->entity[$id] ?? throw new EntityNotFoundException();
     }
 
     public function insert(BasicEntity $entity): ?int
@@ -33,7 +33,6 @@ abstract class BasicManager
         if ($entity->getId() !== null) {
             return $entity->getId();
         }
-        bdump($entity);
         return $this->repository->insert($this->processEntityData($entity));
     }
 
@@ -45,6 +44,7 @@ abstract class BasicManager
 
         try {
             $dataForUpdate = $this->processEntityData($entity);
+            bdump($dataForUpdate);
             if (!empty($dataForUpdate)) {
                 $this->repository->update($entity->getId(), $dataForUpdate);
                 $this->original[$entity->getId()] = $entity;
@@ -71,7 +71,7 @@ abstract class BasicManager
                 unset($y[BasicRepository::COL_ID]);
 
                 if ($x !== $y) {
-                    $data = array_diff_assoc($x, $y);
+                    $data = array_diff_assoc($y, $x);
                 }
             }
         } else {
@@ -79,17 +79,14 @@ abstract class BasicManager
         }
 
         $databaseTranslateTable = $this->repository->getTranslateTable();
-        bdump($databaseTranslateTable);
         if (!self::checkArrayForKeyAndValueMatch($databaseTranslateTable)) {
             foreach ($databaseTranslateTable as $property => $column) {
-                if (isset($data[$property]) && $property !== $column) {
+                if (array_key_exists($property, $data) && $property !== $column) {
                     $data[$column] = $data[$property];
                     unset($data[$property]);
                 }
             }
         }
-        bdump($data);
-
         unset($data[BasicRepository::COL_ID]);
         return $data;
     }

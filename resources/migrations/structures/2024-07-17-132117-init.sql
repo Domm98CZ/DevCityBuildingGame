@@ -13,12 +13,12 @@ $$ LANGUAGE plpgsql;
 
 create table configuration
 (
-    id serial not null,
-    name varchar(128) not null,
-    value varchar(128) not null,
-    dt_ins timestamptz default current_timestamp not null,
-    dt_upd timestamptz default current_timestamp not null,
-    enabled boolean not null default true,
+    id          serial          not null,
+    name        varchar(128)    not null,
+    value       varchar(128)    not null,
+    dt_ins      timestamp       not null default current_timestamp,
+    dt_upd      timestamp       not null default current_timestamp,
+    enabled     boolean         not null default true,
     constraint pk_configuration PRIMARY KEY (id),
     constraint unq_configuration_name unique (name)
 );
@@ -28,27 +28,26 @@ create trigger tr_system_configuration_dt_upd
     for each row
 execute function trigger_set_timestamp();
 
-drop table if exists "player";
-create table if not exists "player"
+drop table if exists "account";
+create table if not exists "account"
 (
     id                 serial       not null,
     username           varchar(100) not null,
     password           varchar(60),
     name               varchar(200) default null,
     email              text         not null,
-    system_player        boolean        not null default false,
-    admin              boolean        not null default false,
-    enabled            boolean        not null default true,
+    admin              boolean      not null default false,
+    enabled            boolean      not null default true,
     dt_ins             timestamp    not null default current_timestamp,
     dt_upd             timestamp    not null default current_timestamp,
-    constraint pk_player primary key (id),
-    constraint unq_player_username unique (username),
-    constraint unq_player_email unique (email),
-    constraint unq_player_name unique (name)
+    constraint pk_account primary key (id),
+    constraint unq_account_username unique (username),
+    constraint unq_account_email unique (email),
+    constraint unq_account_name unique (name)
 );
 
-create trigger tr_player_dt_upd
-    before update on "player"
+create trigger tr_account_dt_upd
+    before update on "account"
     for each row
 execute function trigger_set_timestamp();
 
@@ -75,14 +74,34 @@ create trigger tr_island_dt_upd
     for each row
 execute function trigger_set_timestamp();
 
+
+drop table if exists "player";
+create table if not exists "player"
+(
+    id                 serial      not null,
+    id_account         int4        not null constraint fk_player_account references account,
+    id_island          int4        not null constraint fk_player_island references island,
+    enabled            boolean     not null default true,
+    dt_ins             timestamp   not null default current_timestamp,
+    dt_upd             timestamp   not null default current_timestamp,
+    constraint pk_player primary key (id),
+    constraint unq_player unique (id_account, id_island)
+);
+
+create trigger tr_player_dt_upd
+    before update on "player"
+    for each row
+execute function trigger_set_timestamp();
+
 drop table if exists "map";
 create table if not exists "map"
 (
     id                 serial       not null,
-    id_island           int4        not null constraint fk_map_island references island,
+    id_player          int4         default null constraint fk_map_player references player,
+    id_island          int4         not null constraint fk_map_island references island,
     type               varchar(3)   not null,
-    x                  int4 not null,
-    y                  int4 not null,
+    x                  int4         not null,
+    y                  int4         not null,
     enabled            boolean      not null default true,
     dt_ins             timestamp    not null default current_timestamp,
     dt_upd             timestamp    not null default current_timestamp,
